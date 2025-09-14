@@ -199,8 +199,6 @@
         function setInputsAndCompute(startText, endText, opts = {}) {
             if (startText) document.getElementById('start').value = startText;
             if (endText) document.getElementById('end').value = endText;
-            if (typeof opts.avoidTolls === 'boolean') document.getElementById('avoidTolls').checked = opts.avoidTolls;
-            if (typeof opts.avoidHighways === 'boolean') document.getElementById('avoidHighways').checked = opts.avoidHighways;
             if (typeof opts.consumption === 'number') document.getElementById('consumption').value = String(opts.consumption);
             if (typeof opts.fuelPrice === 'number') document.getElementById('fuelPrice').value = String(opts.fuelPrice);
             computeRoute();
