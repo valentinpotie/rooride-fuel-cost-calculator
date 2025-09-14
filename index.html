@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rooride Fuel Cost Calculator for Australia | Route Planner</title>
+    <meta name="description" content="Plan routes across Australia and estimate fuel costs in AUD with Rooride's free route planner. Autocomplete addresses, driving distance and time.">
+    <link rel="canonical" href="https://www.rooride.com/tools/fuel-cost-calculator">
+    <meta property="og:title" content="Rooride Fuel Cost Calculator for Australia">
+    <meta property="og:description" content="Plan routes across Australia and estimate fuel costs in AUD. Free route planner by Rooride.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_AU">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Rooride Fuel Cost Calculator",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Web",
+      "url": "https://www.rooride.com/tools/fuel-cost-calculator",
+      "offers": { "@type": "Offer", "price": 0, "priceCurrency": "AUD" }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #f67538;
+            --panel-bg: #ffffff;
+            --background-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --panel-width: 380px;
+        }
+
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--background-color); }
+        *, *::before, *::after { box-sizing: border-box; }
+        .container { display: flex; height: 100vh; }
+        #panel { width: var(--panel-width); background: var(--panel-bg); box-shadow: 2px 0 15px rgba(0,0,0,0.1); padding: 25px; z-index: 1000; display: flex; flex-direction: column; overflow-y: auto; }
+        #map { flex-grow: 1; height: 100%; }
+        #panel h1 { font-size: 24px; font-weight: 700; color: var(--text-color); margin: 0 0 20px; }
+        .input-group { margin-bottom: 12px; }
+        .field-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        #panel input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; transition: border-color .2s, box-shadow .2s; }
+        #panel input.with-label { padding-left: 48px; }
+        #panel input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,122,255,.25); }
+        #calculate-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 500; background: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: background .2s; }
+        #calculate-btn:hover { background: #E24F2A; }
+        #results { margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px; }
+        #results h3 { font-size: 18px; font-weight: 700; margin: 0 0 10px; }
+        #results p { font-size: 15px; color: var(--text-muted); line-height: 1.5; margin: 6px 0; }
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .error { color: #c92a2a; }
+        .options { display: flex; gap: 24px; margin: 8px 0 12px; align-items: center; flex-wrap: wrap; }
+        .options label { font-size: 14px; color: var(--text-color); display: inline-flex; align-items: center; gap: 8px; margin: 0; }
+        .options input[type="checkbox"] { width: 18px; height: 18px; vertical-align: middle; accent-color: var(--primary-color); }
+        .cta { margin-top: 16px; padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
+        .cta h3 { margin: 0 0 8px; font-size: 18px; }
+        .cta p { margin: 6px 0 12px; font-size: 14px; color: var(--text-muted); }
+        .cta .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn { display: inline-block; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px; }
+        .btn-primary { background: var(--primary-color); color: #fff; }
+        .btn-outline { border: 1px solid var(--border-color); color: var(--text-color); background: #fff; }
+        details.seo { margin-top: 16px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
+        details.seo > summary { cursor: pointer; padding: 12px 14px; list-style: none; font-weight: 600; }
+        details.seo[open] > summary { border-bottom: 1px solid var(--border-color); }
+        details.seo .content { padding: 10px 14px 14px; }
+        .routes { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .routes a { color: var(--primary-color); text-decoration: none; font-size: 14px; }
+        .routes a:hover { text-decoration: underline; }
+        /* Advanced options */
+        details.advanced { margin-top: 8px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
+        details.advanced > summary { cursor: pointer; padding: 10px 12px; list-style: none; font-weight: 600; color: var(--text-color); }
+        details.advanced[open] > summary { border-bottom: 1px solid var(--border-color); }
+        details.advanced .content { padding: 10px 12px 12px; }
+        /* Swap button row */
+        .swap-row { display: flex; justify-content: center; margin: 6px 0 10px; }
+        #swap-btn { border: 1px solid var(--border-color); background: #fff; color: var(--text-color); border-radius: 999px; padding: 6px 10px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+        #swap-btn:hover { background: #f1f3f5; }
+        /* Autocomplete dropdown */
+        .ac-wrapper { position: relative; }
+        .input-badge-wrap { position: relative; }
+        .suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 1001; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.08); max-height: 240px; overflow-y: auto; }
+        .suggestion-item { padding: 10px 12px; font-size: 14px; color: var(--text-color); cursor: pointer; }
+        .suggestion-item:hover, .suggestion-item.active { background: #f1f3f5; }
+        .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: #40826d; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; pointer-events: none; }
+
+        /* Bottom sheet for mobile */
+        .sheet-header { display: none; }
+        @media (max-width: 768px) {
+          .container { flex-direction: column; }
+          #map { height: 100vh; max-width: 100vw; }
+          #panel { position: fixed; bottom: 0; left: 0; right: 0; width: 100vw; max-width: 100vw; padding: 16px; max-height: 75vh; height: 55vh; border-radius: 14px 14px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); padding-bottom: max(16px, env(safe-area-inset-bottom)); overflow-x: hidden; }
+          #panel.collapsed { height: 64px; overflow: hidden; }
+          .sheet-header { display: flex; align-items: center; justify-content: center; padding: 8px 0 10px; cursor: pointer; }
+          .sheet-handle { width: 44px; height: 4px; background: #ced4da; border-radius: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="panel">
+            <div id="sheet-toggle" class="sheet-header" role="button" aria-expanded="true" aria-controls="panel">
+              <div class="sheet-handle"></div>
+            </div>
+            <h1>Rooride Route & Fuel Cost</h1>
+            <form id="route-form">
+                <div class="input-group ac-wrapper">
+                    <label class="field-label" for="start">Start (A)</label>
+                    <div class="input-badge-wrap">
+                      <span class="input-label" aria-hidden="true">A</span>
+                      <input type="text" id="start" class="with-label" placeholder="Start (e.g., Sydney NSW)" required autocomplete="off">
+                    </div>
+                    <div class="suggestions" id="start-suggestions" hidden></div>
+                </div>
+                <div class="input-group ac-wrapper">
+                    <label class="field-label" for="end">Destination (B)</label>
+                    <div class="input-badge-wrap">
+                      <span class="input-label" aria-hidden="true">B</span>
+                      <input type="text" id="end" class="with-label" placeholder="Destination (e.g., Melbourne VIC)" required autocomplete="off">
+                    </div>
+                    <div class="suggestions" id="end-suggestions" hidden></div>
+                </div>
+                <div class="swap-row">
+                  <button type="button" id="swap-btn" aria-label="Swap start and destination">↕ Swap</button>
+                </div>
+
+                <div class="options">
+                  <label><input type="checkbox" id="avoidTolls"> Avoid tolls</label>
+                  <label><input type="checkbox" id="avoidHighways"> Avoid highways</label>
+                </div>
+
+                <details class="advanced">
+                  <summary>Advanced options</summary>
+                  <div class="content">
+                    <div class="input-group">
+                      <label class="field-label" for="consumption">Fuel consumption (L/100 km)</label>
+                      <input type="number" id="consumption" step="0.1" min="1" value="7.5">
+                      <div class="hint">Typical AU petrol: 6–10 L/100 km</div>
+                    </div>
+                    <div class="input-group">
+                      <label class="field-label" for="fuelPrice">Fuel price (AUD/L)</label>
+                      <input type="number" id="fuelPrice" step="0.01" min="0" value="2.10">
+                    </div>
+                  </div>
+                </details>
+
+                <button type="submit" id="calculate-btn">Plan route</button>
+            </form>
+
+            <div id="results">
+                <h3>Your trip</h3>
+                <p>Enter a start and destination to get route, travel time and estimated fuel cost in AUD.</p>
+                <p class="hint">Estimates only. Actual costs vary with traffic, vehicle and conditions.</p>
+            </div>
+
+            <div class="cta" aria-label="Download Rooride">
+              <h3>Save more with Rooride</h3>
+              <p>Carpool and split fuel costs. Find or offer seats in minutes.</p>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="https://www.rooride.com/download" target="_blank" rel="noopener">Download Rooride</a>
+                <a class="btn btn-outline" href="https://www.rooride.com/how-it-works" target="_blank" rel="noopener">How it works</a>
+              </div>
+            </div>
+
+            <details class="seo">
+              <summary>Popular driving routes in Australia</summary>
+              <div class="content">
+                <div class="routes" id="popular-routes">
+                  <a class="route-link" data-from="Sydney NSW" data-to="Melbourne VIC" href="?from=Sydney%20NSW&to=Melbourne%20VIC">Sydney to Melbourne driving route</a>
+                  <a class="route-link" data-from="Sydney NSW" data-to="Brisbane QLD" href="?from=Sydney%20NSW&to=Brisbane%20QLD">Sydney to Brisbane driving route</a>
+                  <a class="route-link" data-from="Melbourne VIC" data-to="Adelaide SA" href="?from=Melbourne%20VIC&to=Adelaide%20SA">Melbourne to Adelaide driving route</a>
+                  <a class="route-link" data-from="Brisbane QLD" data-to="Gold Coast QLD" href="?from=Brisbane%20QLD&to=Gold%20Coast%20QLD">Brisbane to Gold Coast driving route</a>
+                  <a class="route-link" data-from="Brisbane QLD" data-to="Sunshine Coast QLD" href="?from=Brisbane%20QLD&to=Sunshine%20Coast%20QLD">Brisbane to Sunshine Coast driving route</a>
+                  <a class="route-link" data-from="Perth WA" data-to="Margaret River WA" href="?from=Perth%20WA&to=Margaret%20River%20WA">Perth to Margaret River driving route</a>
+                  <a class="route-link" data-from="Perth WA" data-to="Fremantle WA" href="?from=Perth%20WA&to=Fremantle%20WA">Perth to Fremantle driving route</a>
+                  <a class="route-link" data-from="Adelaide SA" data-to="Barossa Valley SA" href="?from=Adelaide%20SA&to=Barossa%20Valley%20SA">Adelaide to Barossa Valley driving route</a>
+                  <a class="route-link" data-from="Hobart TAS" data-to="Launceston TAS" href="?from=Hobart%20TAS&to=Launceston%20TAS">Hobart to Launceston driving route</a>
+                  <a class="route-link" data-from="Canberra ACT" data-to="Sydney NSW" href="?from=Canberra%20ACT&to=Sydney%20NSW">Canberra to Sydney driving route</a>
+                  <a class="route-link" data-from="Darwin NT" data-to="Katherine NT" href="?from=Darwin%20NT&to=Katherine%20NT">Darwin to Katherine driving route</a>
+                  <a class="route-link" data-from="Cairns QLD" data-to="Port Douglas QLD" href="?from=Cairns%20QLD&to=Port%20Douglas%20QLD">Cairns to Port Douglas driving route</a>
+                  <a class="route-link" data-from="Newcastle NSW" data-to="Sydney NSW" href="?from=Newcastle%20NSW&to=Sydney%20NSW">Newcastle to Sydney driving route</a>
+                  <a class="route-link" data-from="Geelong VIC" data-to="Melbourne VIC" href="?from=Geelong%20VIC&to=Melbourne%20VIC">Geelong to Melbourne driving route</a>
+                </div>
+              </div>
+            </details>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        // Google Maps + Places + Directions (Australia)
+        let map, directionsService, directionsRenderer;
+        let originPlaceId = null, destinationPlaceId = null;
+        let acService, acTokenStart, acTokenEnd;
+        let markerA = null, markerB = null;
+
+        function setInputsAndCompute(startText, endText, opts = {}) {
+            if (startText) document.getElementById('start').value = startText;
+            if (endText) document.getElementById('end').value = endText;
+            if (typeof opts.avoidTolls === 'boolean') document.getElementById('avoidTolls').checked = opts.avoidTolls;
+            if (typeof opts.avoidHighways === 'boolean') document.getElementById('avoidHighways').checked = opts.avoidHighways;
+            if (typeof opts.consumption === 'number') document.getElementById('consumption').value = String(opts.consumption);
+            if (typeof opts.fuelPrice === 'number') document.getElementById('fuelPrice').value = String(opts.fuelPrice);
+            computeRoute();
+        }
+
+        function computeRoute() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Calculating route...</p>';
+
+            // Use placeId if selected; fallback to text strings that Directions can geocode
+            const originText = (document.getElementById('start')?.value || '').trim();
+            const destinationText = (document.getElementById('end')?.value || '').trim();
+            const origin = originPlaceId ? { placeId: originPlaceId } : originText;
+            const destination = destinationPlaceId ? { placeId: destinationPlaceId } : destinationText;
+            if (!origin || !destination) {
+                resultsDiv.innerHTML = '<p class="error">Please enter both start and destination.</p>';
+                return;
+            }
+
+            directionsService.route({
+                origin,
+                destination,
+                travelMode: google.maps.TravelMode.DRIVING,
+                avoidTolls: document.getElementById('avoidTolls').checked,
+                avoidHighways: document.getElementById('avoidHighways').checked,
+            }, (response, status) => {
+                if (status !== google.maps.DirectionsStatus.OK) {
+                    resultsDiv.innerHTML = `<p class="error">Error: ${status}</p>`;
+                    return;
+                }
+
+                directionsRenderer.setDirections(response);
+                const leg = response.routes[0].legs[0];
+                const km = leg.distance.value / 1000;
+                const minutes = Math.round(leg.duration.value / 60);
+
+                const consumption = parseFloat(document.getElementById('consumption').value || '7.5');
+                const fuelPrice = parseFloat(document.getElementById('fuelPrice').value || '2.10');
+                const liters = (km / 100) * consumption;
+                const cost = liters * fuelPrice;
+                const currency = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+
+                const h = Math.floor(minutes / 60);
+                const m = minutes % 60;
+                const timeStr = (h ? h + 'h ' : '') + m + 'min';
+
+                resultsDiv.innerHTML = `
+                    <h3>Trip summary</h3>
+                    <p><strong>Distance:</strong> ${km.toFixed(1)} km</p>
+                    <p><strong>Estimated time:</strong> ${timeStr}</p>
+                    <p><strong>Avg. consumption:</strong> ${consumption.toFixed(1)} L/100 km</p>
+                    <p><strong>Fuel price:</strong> ${currency.format(fuelPrice)} / L</p>
+                    <p><strong>Fuel needed:</strong> ${liters.toFixed(2)} L</p>
+                    <p><strong>Estimated fuel cost:</strong> ${currency.format(cost)}</p>
+                `;
+
+                // On mobile, auto-expand the bottom sheet to show results
+                const panel = document.getElementById('panel');
+                if (window.matchMedia('(max-width: 768px)').matches) {
+                  panel.classList.remove('collapsed');
+                  const toggle = document.getElementById('sheet-toggle');
+                  if (toggle) toggle.setAttribute('aria-expanded', 'true');
+                }
+
+                // Place custom A (start) and B (destination) markers in green
+                if (markerA) markerA.setMap(null);
+                if (markerB) markerB.setMap(null);
+                markerA = new google.maps.Marker({ position: leg.start_location, map, icon: makePinIcon('A'), title: 'Start (A)', zIndex: 1000 });
+                markerB = new google.maps.Marker({ position: leg.end_location, map, icon: makePinIcon('B'), title: 'Destination (B)', zIndex: 1000 });
+            });
+        }
+
+        function runFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const from = params.get('from');
+            const to = params.get('to');
+            const consumption = parseFloat(params.get('consumption'));
+            const fuelPrice = parseFloat(params.get('price'));
+            const avoidTolls = params.get('avoidTolls') === '1';
+            const avoidHighways = params.get('avoidHighways') === '1';
+            if (from && to) {
+                setInputsAndCompute(from, to, {
+                    consumption: isNaN(consumption) ? undefined : consumption,
+                    fuelPrice: isNaN(fuelPrice) ? undefined : fuelPrice,
+                    avoidTolls,
+                    avoidHighways,
+                });
+            }
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -25.2744, lng: 133.7751 }, // Australia
+                zoom: 5,
+                mapTypeControl: false,
+            });
+
+            directionsService = new google.maps.DirectionsService();
+
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#f67538',
+                    strokeOpacity: 0.7,
+                    strokeWeight: 6
+                }
+            });
+            directionsRenderer.setMap(map);
+
+            // Custom lightweight autocomplete using Places AutocompleteService for full styling control
+            acService = new google.maps.places.AutocompleteService();
+            acTokenStart = new google.maps.places.AutocompleteSessionToken();
+            acTokenEnd = new google.maps.places.AutocompleteSessionToken();
+
+            setupAutocomplete('start', 'start-suggestions', (prediction) => {
+                originPlaceId = prediction.place_id || null;
+            }, 'start');
+            setupAutocomplete('end', 'end-suggestions', (prediction) => {
+                destinationPlaceId = prediction.place_id || null;
+            }, 'end');
+
+            const form = document.getElementById('route-form');
+            const resultsDiv = document.getElementById('results');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                computeRoute();
+            });
+
+            // Swap start/end values
+            document.getElementById('swap-btn').addEventListener('click', () => {
+                const s = document.getElementById('start');
+                const e2 = document.getElementById('end');
+                const tmp = s.value;
+                s.value = e2.value;
+                e2.value = tmp;
+                // swap cached place IDs as well
+                const pid = originPlaceId; originPlaceId = destinationPlaceId; destinationPlaceId = pid;
+                // hide any open suggestion lists
+                const ss = document.getElementById('start-suggestions');
+                const es = document.getElementById('end-suggestions');
+                if (ss) { ss.hidden = true; ss.innerHTML = ''; }
+                if (es) { es.hidden = true; es.innerHTML = ''; }
+                computeRoute();
+            });
+
+            // Bind SEO route links to compute without reload (but keep hrefs for SEO)
+            document.querySelectorAll('.route-link').forEach(a => {
+                a.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    const from = a.getAttribute('data-from');
+                    const to = a.getAttribute('data-to');
+                    if (from && to) {
+                        history.replaceState({}, '', a.getAttribute('href'));
+                        originPlaceId = null; destinationPlaceId = null;
+                        setInputsAndCompute(from, to);
+                    }
+                });
+            });
+
+            // If URL has params, run automatically
+            runFromURL();
+
+            // Bottom sheet toggle for mobile
+            const panel = document.getElementById('panel');
+            const toggle = document.getElementById('sheet-toggle');
+            function applySheetMode() {
+              if (window.matchMedia('(max-width: 768px)').matches) {
+                // start expanded by default
+                panel.classList.remove('collapsed');
+                toggle?.setAttribute('aria-expanded', 'true');
+              } else {
+                panel.classList.remove('collapsed');
+                toggle?.setAttribute('aria-expanded', 'true');
+              }
+            }
+            applySheetMode();
+            window.addEventListener('resize', applySheetMode);
+            toggle?.addEventListener('click', () => {
+              const isCollapsed = panel.classList.toggle('collapsed');
+              toggle.setAttribute('aria-expanded', (!isCollapsed).toString());
+            });
+        }
+
+        function setupAutocomplete(inputId, listId, onPick, type) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            let activeIndex = -1;
+
+            function hide() { list.hidden = true; list.innerHTML = ''; activeIndex = -1; }
+
+            function render(predictions) {
+                list.innerHTML = '';
+                predictions.forEach((p, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.textContent = p.description;
+                    item.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        input.value = p.description;
+                        onPick(p);
+                        hide();
+                        // fresh session after a selection
+                        if (type === 'start') acTokenStart = new google.maps.places.AutocompleteSessionToken();
+                        else acTokenEnd = new google.maps.places.AutocompleteSessionToken();
+                        computeRoute();
+                    });
+                    list.appendChild(item);
+                });
+                list.hidden = predictions.length === 0;
+            }
+
+            input.addEventListener('input', () => {
+                const q = input.value.trim();
+                if (!q) { onPick({ place_id: null }); hide(); return; }
+                const token = type === 'start' ? acTokenStart : acTokenEnd;
+                const opts = { input: q, sessionToken: token, componentRestrictions: { country: 'au' } };
+                acService.getPlacePredictions(opts, (preds, status) => {
+                    if (status !== google.maps.places.PlacesServiceStatus.OK || !preds) { hide(); return; }
+                    render(preds.slice(0, 6));
+                });
+            });
+
+            input.addEventListener('focus', () => {
+                if (list.children.length > 0) list.hidden = false;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                const items = Array.from(list.children);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = Math.min(items.length - 1, activeIndex + 1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = Math.max(0, activeIndex - 1);
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0 && items[activeIndex]) {
+                        e.preventDefault();
+                        items[activeIndex].dispatchEvent(new Event('mousedown'));
+                    }
+                } else if (e.key === 'Escape') {
+                    hide();
+                } else {
+                    return; // let input handler fetch new suggestions
+                }
+                items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+                if (items[activeIndex]) items[activeIndex].scrollIntoView({ block: 'nearest' });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!list.contains(e.target) && e.target !== input) hide();
+            });
+        }
+
+        // Build a green pin icon with a letter (A/B)
+        function makePinIcon(letter) {
+            const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns='http://www.w3.org/2000/svg' width='32' height='48' viewBox='0 0 32 48'>
+  <path d='M16 48s14-10.2 14-24C30 10.745 23.255 4 16 4S2 10.745 2 24c0 13.8 14 24 14 24z' fill='#40826d'/>
+  <text x='16' y='26' text-anchor='middle' font-family='Inter, Arial, sans-serif' font-weight='700' font-size='14' fill='#ffffff'>${letter}</text>
+</svg>`;
+            return {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+                scaledSize: new google.maps.Size(28, 42),
+                anchor: new google.maps.Point(14, 42)
+            };
+        }
+    </script>
+    <!-- Replace YOUR_API_KEY with your Google Maps JavaScript API key with Places and Directions enabled -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBP-_8Edjth8CPQzn5DJbHAfYMTg4lxwYI&libraries=places&callback=initMap&language=en-AU&region=AU&v=weekly&loading=async"></script>
+</body>
+</html>
