@@ -222,8 +222,6 @@
                 origin,
                 destination,
                 travelMode: google.maps.TravelMode.DRIVING,
-                avoidTolls: document.getElementById('avoidTolls').checked,
-                avoidHighways: document.getElementById('avoidHighways').checked,
             }, (response, status) => {
                 if (status !== google.maps.DirectionsStatus.OK) {
                     resultsDiv.innerHTML = `<p class="error">Error: ${status}</p>`;
