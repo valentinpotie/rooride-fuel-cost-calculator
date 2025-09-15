@@ -43,12 +43,14 @@
         #panel { width: var(--panel-width); background: var(--panel-bg); box-shadow: 2px 0 15px rgba(0,0,0,0.1); padding: 25px; z-index: 1000; display: flex; flex-direction: column; overflow-y: auto; }
         #map { flex-grow: 1; height: 100%; }
         #panel h1 { font-size: 24px; font-weight: 700; color: var(--text-color); margin: 0 0 20px; }
+        #panel h1.logo { display: flex; align-items: center; justify-content: center; margin: 4px 0 12px; padding: 0; line-height: 1; }
+        #panel h1.logo img { height: 52px; width: auto; max-width: 100%; display: block; }
         .input-group { margin-bottom: 12px; }
         .field-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--text-muted); font-weight: 600; }
         #panel input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; transition: border-color .2s, box-shadow .2s; }
         #panel input.with-label { padding-left: 48px; }
         #panel input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,122,255,.25); }
-        #calculate-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 500; background: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: background .2s; }
+        #calculate-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 500; background: var(--primary-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: background .2s; margin-top: 12px; }
         #calculate-btn:hover { background: #E24F2A; }
         #results { margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px; }
         #results h3 { font-size: 18px; font-weight: 700; margin: 0 0 10px; }
@@ -98,6 +100,7 @@
           #panel.collapsed { height: 64px; overflow: hidden; }
           .sheet-header { display: flex; align-items: center; justify-content: center; padding: 8px 0 10px; cursor: pointer; }
           .sheet-handle { width: 44px; height: 4px; background: #ced4da; border-radius: 2px; }
+          #panel h1.logo img { height: 44px; }
         }
     </style>
 </head>
@@ -108,7 +111,9 @@
             <div id="sheet-toggle" class="sheet-header" role="button" aria-expanded="true" aria-controls="panel">
               <div class="sheet-handle"></div>
             </div>
-            <h1>Rooride Route & Fuel Cost</h1>
+            <h1 class="logo">
+              <img src="Rounded_logo_rooride_no_backpackground.png" alt="Rooride">
+            </h1>
             <form id="route-form">
                 <div class="input-group ac-wrapper">
                     <label class="field-label" for="start">Start (A)</label>
@@ -158,8 +163,8 @@
               <h3>Save more with Rooride</h3>
               <p>Carpool and split fuel costs. Find or offer seats in minutes.</p>
               <div class="btn-row">
-                <a class="btn btn-primary" href="https://www.rooride.com/download" target="_blank" rel="noopener">Download Rooride</a>
-                <a class="btn btn-outline" href="https://www.rooride.com/how-it-works" target="_blank" rel="noopener">How it works</a>
+                <a class="btn btn-primary" href="https://rooride.app.link/webflow" target="_blank" rel="noopener">Download Rooride</a>
+                <a class="btn btn-outline" href="https://www.rooride.app" target="_blank" rel="noopener">How it works</a>
               </div>
             </div>
 
